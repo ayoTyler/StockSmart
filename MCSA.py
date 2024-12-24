@@ -218,7 +218,7 @@ def main():
     if not os.getenv("email") or not os.getenv("password"):
         raise Exception("Email credentials not found")
 
-    if os.getenv("enable_test_email") and os.getenv("enable_test_email").strip().lower() == 'true':
+    if not os.getenv("disable_test_email") or (os.getenv("disable_test_email") and os.getenv("disable_test_email").strip().lower() != 'true'):
         send_test_email()
     else:
         print(f'[{dt.now()}] Skipping test email')
