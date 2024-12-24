@@ -6,7 +6,7 @@ Check the stock of a specific Micro Center product. Optionally, securely link yo
 
 ## <span style="color: limegreen;">Installation</span>
 
-<i>**Note: The default code looks for an AMD Ryzen 7 9800X3D at a Micro Center Store in Dallas, TX</i>
+<i>**Note: The default code checks the Micro Center Stores in Dallas, TX and Houston, TX</i>
 
 
 <b>Step-by-step instructions for setting up the project:</b>
@@ -24,33 +24,22 @@ Check the stock of a specific Micro Center product. Optionally, securely link yo
     pip install -r requirements.txt
     ```
     *Alternatively: To use your system's command console/terminal window to install the items listed within the requirements folder:<br>
-    1\. Change directory (cd) to the project folder's location that contains <b>requirements.txt</b> <br>
+    1\. Change directory (`cd`) to the project folder's location that contains <b>requirements.txt</b> <br>
     2\. Run the above command<br>
     <br>
-3.  <b>On Line 23 within the code, replace the Store Identification Number with your local Micro Center Store Identification Number:</b>
+3.  <b>On Line 232 within the code, replace the store names with the name of your local Micro Center store(s):</b>
     ```python
-    # Line 23
-    'value': 'store number here',
+    # Line 232
+    stores_to_check = ['Dallas']
     ```
+
     <br>
-    <b>To find your local Micro Center Store Number:</b><br>
-    1. Make sure you have selected a store on www.microcenter.com<br>
-    2. Right-Click the page, choose 'Inspect'<br>
-    3. Click the double arrow (>>) at the top of the Inspect Element console and select 'Application'<br>
-    4. Under 'Storage', click 'Cookies'<br>
-    5. Under the 'Name' column, look for 'storeSelected' and find the appropriate value associated with that cookie.<br>
-    6. Replace the number on Line 23 in the code with the appropriate Store Identification Number as shown in the example below.<br>
-    
+4.  <b>On Line 47 within the code, add or update the Product Page URL with your desired product:</b>
     ```python
-    # Example
-    # Line 23
-    'value': '131',
-    ```
-    <br>
-4.  <b>On Line 30 within the code, replace the Product Page URL with your desired product:</b>
-    ```python
-    # Line 30 - Get the product page URL
-    driver.get("https://www.microcenter.com/your-product-url-here")
+    # Line 47 - Get the product page URL
+    PRODUCTS = {
+        'simple-part-name-here': 'https://www.microcenter.com/your-product-url-here',
+    }
     ```
     <br>
 5.  <b><i>(Optional)</i> Adjust the speed that the program functions:</b>
@@ -58,7 +47,7 @@ Check the stock of a specific Micro Center product. Optionally, securely link yo
     <br>
     Slower Internet = Higher Number (~30)
     ```python
-    # Line 18 & Line 33 - Wait for the page to load, 
+    # Line 122, 143, 160, 249, 252 - Wait for the page to load,
     # adjust as needed (seconds)
     time.sleep(30)
     ```
@@ -67,7 +56,7 @@ Check the stock of a specific Micro Center product. Optionally, securely link yo
     
     Faster Internet = Lower Number (~5)
     ```python
-    # Line 18 & Line 33 - Wait for the page to load, 
+    # Line 122, 143, 160, 249, 252 - Wait for the page to load,
     # adjust as needed (seconds)
     time.sleep(5)
     ```
@@ -88,15 +77,15 @@ Check the stock of a specific Micro Center product. Optionally, securely link yo
     5\. Enter your email<br> 
     6\. Enter your password<br>
     7\. Expect to receive a test email from yourself confirming that your email is linked with the application<br>
+    8\. To avoid having to re-enter your email and app password every time, it is recommended to place them in `./venv/config.env`. See `config.env.example` for reference.
 
 <span style="color: limegreen;"><b><u>That's all!</u></span> Leave the program running in the background. If you shut down the computer, be sure to run through the steps again to get it working again. </b>
 
 ### <span style="color: goldenrod;">Future Update Plans</span>
 
-1.  Show and email the amount in stock<br>
-2.  GUI window<br>
-3.  Multiple Micro Center stores listed - no code-changing required<br>
-4.  Works for other websites<br>
+1.  GUI window<br>
+2.  Multiple Micro Center stores listed - no code-changing required<br>
+3.  Works for other websites<br>
 
 
 ### <span style="color: darkturquoise;">If this program helped you, buy me a coffee :)</span><br>

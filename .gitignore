@@ -1,0 +1,4 @@
+# Prevent users from accidentally committing secrets.
+.venv/
+
+.idea/
