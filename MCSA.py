@@ -13,14 +13,41 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 STORES = {
+    'Tustin': '101',
+    'Denver': '181',
+    'Miami': '185',
+    'Duluth': '065',
+    'Marietta': '041',
+    'Chicago': '151',
+    'Westmont': '025',
+    'Indianapolis': '165',
+    'Overland Park': '191',
+    'Cambridge': '121',
+    'Rockville': '085',
+    'Parkville': '125',
+    'Madison Heights': '055',
+    'St. Louis Park': '045',
+    'Brentwood': '095',
+    'Charlotte': '175',
+    'North Jersey': '075',
+    'Westbury': '171',
+    'Brooklyn': '115',
+    'Flushing': '145',
+    'Yonkers': '105',
+    'Columbus': '141',
+    'Mayfield Heights': '051',
+    'Sharonville': '071',
+    'St. Davids': '061',
+    'Houston': '155',
     'Dallas': '131',
-    'Houston': '155'
+    'Fairfax': '081',
 }
+
+# Update this with whatever products you want to monitor.
 PRODUCTS = {
     'fan': 'https://www.microcenter.com/product/667290/lian-li-uni-fan-reverse-sl-infinity-fluid-dynamic-bearing-120mm-case-fan-white',
     'cpu': 'https://www.microcenter.com/product/687907/amd-ryzen-7-9800x3d-granite-ridge-am5-470ghz-8-core-boxed-processor-heatsink-not-included',
 }
-SELECTED_PRODUCT = 'cpu'
 
 
 def prompt_for_email_details():
@@ -66,6 +93,46 @@ def send_test_email():
     except Exception as e:
         print(f"[{dt.now()}] Failed to send test email: {e}")
         print(f"[{dt.now()}] Application will continue without user email")
+
+
+def prompt_for_product():
+    print(f"The following products are enabled: {', '.join(PRODUCTS.keys())}")
+
+    os.environ["selected_product"] = input('Select your desired product: ').strip().lower()
+
+    while not os.getenv("selected_product") or os.getenv("selected_product") not in PRODUCTS:
+        print('Invalid product selected')
+        os.environ["selected_product"] = input('Select your desired product: ').strip().lower()
+
+
+# Helper method to generate the list of stores to their IDs if needed.
+# Since Micro Center store locations are pretty static,
+# we can just run this once and update the mapping.
+def get_stores():
+    # Set up Chrome options to enable headless mode
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Enable headless mode
+    chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
+    chrome_options.add_argument("--no-sandbox")  # Fix potential environment issues
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver.get('https://www.microcenter.com')
+
+    # Wait for the page to load, adjust as needed (seconds)
+    time.sleep(1)
+
+    store_selector_elements = driver.find_elements(By.CSS_SELECTOR,
+                                                   '.changeMyStore ul.dropdown-menu li.dropdown-itemLI')
+    stores = {}
+    for store_element in store_selector_elements:
+        store_name = store_element.find_element(By.CLASS_NAME, 'storeName').get_attribute('innerText')
+        store_id = store_element.get_attribute('class').split()[-1].split('_')[
+            -1]  # e.g., 'store_041' -> ['store', '041']
+        stores[store_name] = store_id
+
+    driver.quit()
+
+    return stores
 
 
 def set_current_store(driver, store_id):
@@ -138,6 +205,8 @@ def check_stock(driver):
 
 
 def main():
+    prompt_for_product()
+
     # Load email credentials from the config.env file if possible
     config_path = ".venv/config.env"
     load_dotenv(config_path)
@@ -160,16 +229,16 @@ def main():
     chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
     chrome_options.add_argument("--no-sandbox")  # Fix potential environment issues
 
-    stores_to_check = ['Dallas', 'Houston']
+    stores_to_check = ['Dallas', 'Houston']  # Update this with the stores you want to check. Reference the map at the start.
     while True:
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         for store in stores_to_check:
             set_current_store(driver, STORES[store])
-            navigate_to_product(driver, PRODUCTS[SELECTED_PRODUCT])
+            navigate_to_product(driver, PRODUCTS[os.getenv('selected_product')])
             product_name = driver.find_element(By.CLASS_NAME, 'product-header').get_attribute('innerText')
             quantity_in_stock = check_stock(driver)
 
-            if quantity_in_stock:
+            if quantity_in_stock != '0':
                 print(f'[{dt.now()}] {product_name} is in stock at {store}! Available quantity: {quantity_in_stock}')
                 send_in_stock_email(store, product_name, quantity_in_stock)
                 driver.quit()  # Close the browser
@@ -179,7 +248,8 @@ def main():
 
             time.sleep(10)  # An arbitrary delay between checking stores to hopefully avoid being flagged as a bot.
         driver.quit()  # Use a new driver and close it afterwards for every loop to mitigate memory leaks.
-        time.sleep(300)  # Change the number to check stock sooner/faster (seconds). Default: checks stock every ~5 minutes
+        time.sleep(
+            300)  # Change the number to check stock sooner/faster (seconds). Default: checks stock every ~5 minutes
 
 
 if __name__ == '__main__':
